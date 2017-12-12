@@ -5,11 +5,13 @@ import ru.atom.gameserver.message.Message;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 class InputQueue implements MessagesOffering {
 
-    private final Queue<Message> messageQueue = new ConcurrentLinkedQueue<>();
+    private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<>(16);
 
     @Override
     public void offerMessage(Message message) {
@@ -18,11 +20,7 @@ class InputQueue implements MessagesOffering {
 
     public List<Message> pollMessages() {
         List<Message> messageList = new ArrayList<>();
-        synchronized (messageQueue) {
-            while (!messageQueue.isEmpty()) {
-                messageList.add(messageQueue.poll());
-            }
-        }
+        messageQueue.drainTo(messageList);
         return messageList;
     }
 }
