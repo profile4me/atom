@@ -1,5 +1,12 @@
 package ru.atom.gameserver.gsession;
 
-public class GameMechanics {
+import ru.atom.gameserver.tick.Tickable;
+
+public class GameMechanics implements Tickable {
+
+    @Override
+    public void tick(long elapsed) {
+
+    }
 
 }

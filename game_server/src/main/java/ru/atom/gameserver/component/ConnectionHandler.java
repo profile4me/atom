@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionHandler extends TextWebSocketHandler implements WebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
-    private final Map<Long, Set<WebSocketSession>> sessionUnion = new ConcurrentHashMap<>();
+    private final Map<WebSocketSession, Long> sessionMap = new ConcurrentHashMap<>();
 
     @Autowired
     private GameRepository gameRepository;
@@ -32,61 +32,38 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
-        if (!sessionUnion.containsKey(idLoginPair.getKey())) {
-            sessionUnion.put(idLoginPair.getKey(), new HashSet<>());
-        }
-        sessionUnion.get(idLoginPair.getKey()).add(session);
+        sessionMap.put(session, idLoginPair.getKey());
 
         logger.info("new ws connection gameid=" + idLoginPair.getKey() + " login=" + idLoginPair.getValue());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
-        Long gameId = idLoginPair.getKey();
-        if (!sessionUnion.containsKey(gameId)) {
-            logger.warn("connection handler has not gameId " + gameId);
-            return;
-        }
-        Set<WebSocketSession> webSocketSessions = sessionUnion.get(gameId);
-        webSocketSessions.remove(session);
-        if (webSocketSessions.isEmpty()) {
-            sessionUnion.remove(gameId);
-        }
+        sessionMap.remove(session);
 
         logger.info("ws connection has been closed with status code " + status.getCode());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
-        Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
-        Long gameId = idLoginPair.getKey();
-        if (!sessionUnion.containsKey(gameId)) {
-            logger.warn("connection handler has not gameId " + gameId);
-            return;
-        }
         Message message = JsonHelper.fromJson(textMessage.toString(), Message.class);
-        gameRepository.getGameById(gameId).messagesOffering().offerMessage(message);
+        gameRepository.getGameById(sessionMap.get(session)).messagesOffering().offerMessage(message);
+
         logger.info("text message has been received");
     }
 
     public void sendMessage(long gameId, Message message) {
-        if (!sessionUnion.containsKey(gameId)) {
-            logger.warn("connection handler has not gameId " + gameId);
-            return;
-        }
-        Set<WebSocketSession> webSocketSessions = sessionUnion.get(gameId);
-        for (WebSocketSession webSocketSession : webSocketSessions) {
-            if (webSocketSession.isOpen()) {
-                try {
-                    webSocketSession.sendMessage(new TextMessage(JsonHelper.toJson(message)));
-                } catch (IOException exception) {
-                    logger.warn(exception.getMessage());
-                }
-            } else {
-                logger.warn("web socket " + webSocketSession + " is not opened");
+        for (Map.Entry<WebSocketSession, Long> entry : sessionMap.entrySet()) {
+            if (!Long.valueOf(gameId).equals(entry.getValue())) {
+                continue;
+            }
+            try {
+                entry.getKey().sendMessage(new TextMessage(JsonHelper.toJson(message)));
+            } catch (IOException exception) {
+                logger.warn(exception.getMessage());
             }
         }
+
         logger.info("text message has been sent");
     }
 

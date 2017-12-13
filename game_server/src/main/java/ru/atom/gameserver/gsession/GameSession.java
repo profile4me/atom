@@ -15,6 +15,8 @@ public class GameSession {
         this.gameMechanics = new GameMechanics();
         this.replicator = new Replicator(gameId, connectionHandler);
         this.inputQueue = new InputQueue();
+
+        ticker.registerTickable(gameMechanics);
     }
 
     public MessagesOffering messagesOffering() {
