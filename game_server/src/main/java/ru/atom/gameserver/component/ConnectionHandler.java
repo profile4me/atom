@@ -5,21 +5,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import ru.atom.gameserver.gsession.GameSession;
 import ru.atom.gameserver.message.Message;
 import ru.atom.gameserver.service.GameRepository;
 import ru.atom.gameserver.util.JsonHelper;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@CrossOrigin
 @Component
 public class ConnectionHandler extends TextWebSocketHandler implements WebSocketHandler {
 
@@ -33,20 +34,20 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
         sessionMap.put(session, idLoginPair.getKey());
-
+        GameSession gameSession = gameRepository.getGameById(idLoginPair.getKey());
+        gameSession.addPlayer(idLoginPair.getValue());
         logger.info("new ws connection gameid=" + idLoginPair.getKey() + " login=" + idLoginPair.getValue());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessionMap.remove(session);
-
         logger.info("ws connection has been closed with status code " + status.getCode());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
-        Message message = JsonHelper.fromJson(textMessage.toString(), Message.class);
+        Message message = JsonHelper.fromJson(textMessage.getPayload(), Message.class);
         gameRepository.getGameById(sessionMap.get(session)).messagesOffering().offerMessage(message);
 
         logger.info("text message has been received");

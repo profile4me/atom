@@ -24,7 +24,11 @@ public class GameSession {
     }
 
     public void start() {
-        
+        new Thread(ticker::gameLoop).start();
+    }
+
+    public void addPlayer(String login) {
+        gameMechanics.addPlayer(login);
     }
 
 }

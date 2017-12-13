@@ -1,5 +1,6 @@
 package ru.atom.gameserver.configuration;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -12,7 +13,12 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new ConnectionHandler(), "/game/*").setAllowedOrigins("*");
+        registry.addHandler(echoWebSocketHandler(), "/game/*").setAllowedOrigins("*");
+    }
+
+    @Bean
+    public ConnectionHandler echoWebSocketHandler() {
+        return new ConnectionHandler();
     }
 
 }
