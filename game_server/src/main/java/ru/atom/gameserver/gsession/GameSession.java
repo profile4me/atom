@@ -3,6 +3,9 @@ package ru.atom.gameserver.gsession;
 import ru.atom.gameserver.component.ConnectionHandler;
 import ru.atom.gameserver.tick.Ticker;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class GameSession {
 
     private final Ticker ticker;
@@ -10,11 +13,14 @@ public class GameSession {
     private final Replicator replicator;
     private final InputQueue inputQueue;
 
+    private final Map<String, Integer> loginOnIdMap;
+
     public GameSession(Long gameId, ConnectionHandler connectionHandler) {
         this.ticker = new Ticker();
-        this.gameMechanics = new GameMechanics();
         this.replicator = new Replicator(gameId, connectionHandler);
+        this.gameMechanics = new GameMechanics(ticker, replicator);
         this.inputQueue = new InputQueue();
+        this.loginOnIdMap = new HashMap<>();
 
         ticker.registerTickable(gameMechanics);
     }
@@ -28,7 +34,7 @@ public class GameSession {
     }
 
     public void addPlayer(String login) {
-        gameMechanics.addPlayer(login);
+        loginOnIdMap.put(login, new Integer(gameMechanics.addPlayer()));
     }
 
 }
