@@ -3,8 +3,8 @@ package ru.atom.gameserver.tick;
 
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -12,7 +12,7 @@ public class Ticker {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(Ticker.class);
     private static final int FPS = 60;
     private static final long FRAME_TIME = 1000 / FPS;
-    private Set<Tickable> tickables = new ConcurrentSkipListSet<>();
+    private List<Tickable> tickables = new CopyOnWriteArrayList<>();
     private long tickNumber = 0;
 
     public void gameLoop() {

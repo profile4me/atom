@@ -22,6 +22,7 @@ public class GameSession {
         this.inputQueue = new InputQueue();
         this.loginOnIdMap = new HashMap<>();
 
+        //gameMechanics must be last tickable in the list of tickable
         ticker.registerTickable(gameMechanics);
     }
 
