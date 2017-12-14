@@ -1,12 +1,14 @@
 package ru.atom.gameserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import ru.atom.gameserver.geometry.Point;
 
-public class Box extends AbstractGameObject {
+public class Wood extends AbstractGameObject {
 
+    @JsonIgnore
     private Buff.BuffType buffType = null;
 
-    public Box(int id, Point position) {
+    public Wood(int id, Point position) {
         super(id, position);
     }
 

@@ -3,7 +3,7 @@ package ru.atom.gameserver.gsession;
 import ru.atom.gameserver.geometry.Point;
 import ru.atom.gameserver.model.GameObject;
 import ru.atom.gameserver.model.Pawn;
-import ru.atom.gameserver.model.Wall;
+import ru.atom.gameserver.model.Wood;
 import ru.atom.gameserver.tick.Tickable;
 import ru.atom.gameserver.tick.Ticker;
 
@@ -26,7 +26,7 @@ public class GameMechanics implements Tickable {
         this.replicator = replicator;
         //init walls and boxes here
         //bombs, explosion and paws must be added to ticker
-        gameObjects.add(new Wall(id++, new Point(0.0f, 0.0f)));
+        gameObjects.add(new Wood(id++, new Point(32.0f, 32.0f)));
     }
 
     int addPlayer() {
