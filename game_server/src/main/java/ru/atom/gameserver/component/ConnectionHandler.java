@@ -10,6 +10,7 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.atom.gameserver.gsession.GameSession;
 import ru.atom.gameserver.message.Message;
@@ -20,8 +21,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@CrossOrigin
-@Component
 public class ConnectionHandler extends TextWebSocketHandler implements WebSocketHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionHandler.class);
@@ -36,6 +35,7 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
         sessionMap.put(session, idLoginPair.getKey());
         GameSession gameSession = gameRepository.getGameById(idLoginPair.getKey());
         gameSession.addPlayer(idLoginPair.getValue());
+        logger.info(this.toString());
         logger.info("new ws connection gameid=" + idLoginPair.getKey() + " login=" + idLoginPair.getValue());
     }
 
@@ -54,20 +54,15 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     }
 
     public void sendMessage(long gameId, Message message) {
-        logger.info("size " + sessionMap.size());
-        for (Map.Entry<WebSocketSession, Long> entry : sessionMap.entrySet()) {
-            logger.info(message.toString());
-            if (!Long.valueOf(gameId).equals(entry.getValue())) {
-                continue;
+        sessionMap.forEach((ws, id) -> {
+            if (id.equals(gameId)) {
+                try {
+                    ws.sendMessage(new TextMessage(JsonHelper.toJson(message)));
+                } catch (IOException e) {
+                    logger.warn(e.getMessage());
+                }
             }
-            try {
-                entry.getKey().sendMessage(new TextMessage(JsonHelper.toJson(message)));
-            } catch (IOException exception) {
-                logger.warn(exception.getMessage());
-            }
-        }
-
-        logger.info("text message has been sent");
+        });
     }
 
     private Pair<Long, String> getParameters(String uri) {

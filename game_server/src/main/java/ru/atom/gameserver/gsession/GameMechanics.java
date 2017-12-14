@@ -9,21 +9,24 @@ import ru.atom.gameserver.tick.Ticker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameMechanics implements Tickable {
 
+    private int id;
     private final Ticker ticker;
     private final Replicator replicator;
 
-    private List<Pawn> pawns = new ArrayList<>();
-    private List<GameObject> gameObjects = new ArrayList<>();
+    private final List<Pawn> pawns = new ArrayList<>();
+    private final List<GameObject> gameObjects = new CopyOnWriteArrayList<>();
 
     GameMechanics(Ticker ticker, Replicator replicator) {
+        id = 0;
         this.ticker = ticker;
         this.replicator = replicator;
         //init walls and boxes here
         //bombs, explosion and paws must be added to ticker
-        gameObjects.add(new Wall(0, new Point(0.0f, 0.0f)));
+        gameObjects.add(new Wall(id++, new Point(0.0f, 0.0f)));
     }
 
     int addPlayer() {
