@@ -54,7 +54,9 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     }
 
     public void sendMessage(long gameId, Message message) {
+        logger.info("size " + sessionMap.size());
         for (Map.Entry<WebSocketSession, Long> entry : sessionMap.entrySet()) {
+            logger.info(message.toString());
             if (!Long.valueOf(gameId).equals(entry.getValue())) {
                 continue;
             }
