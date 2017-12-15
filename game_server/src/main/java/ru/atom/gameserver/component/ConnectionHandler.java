@@ -15,6 +15,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import ru.atom.gameserver.gsession.GameSession;
 import ru.atom.gameserver.message.Message;
 import ru.atom.gameserver.service.GameRepository;
+import ru.atom.gameserver.service.MatchMakerService;
 import ru.atom.gameserver.util.JsonHelper;
 
 import java.io.IOException;
@@ -28,20 +29,31 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
 
     @Autowired
     private GameRepository gameRepository;
+    @Autowired
+    private MatchMakerService matchMakerService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
         sessionMap.put(session, idLoginPair.getKey());
         GameSession gameSession = gameRepository.getGameById(idLoginPair.getKey());
-        gameSession.addPlayer(idLoginPair.getValue());
-        logger.info(this.toString());
+        sendMessage(idLoginPair.getKey(), gameSession.addPlayer(idLoginPair.getValue()));
         logger.info("new ws connection gameid=" + idLoginPair.getKey() + " login=" + idLoginPair.getValue());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
         sessionMap.remove(session);
+        Long id = idLoginPair.getKey();
+        GameSession gameSession = gameRepository.getGameById(id);
+        if (gameSession.removePlayer(idLoginPair.getValue())) {
+            //if we are here gameSession is empty, so we should stop it
+            gameRepository.deleteGame(id);
+            gameSession.stop();
+            //matchMakerService.sendGameOver(id, "");
+            logger.info("delete game with id=" + id);
+        }
         logger.info("ws connection has been closed with status code " + status.getCode());
     }
 
@@ -59,6 +71,8 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
                 try {
                     ws.sendMessage(new TextMessage(JsonHelper.toJson(message)));
                 } catch (IOException e) {
+                    logger.warn(e.getMessage());
+                } catch (Exception e) {
                     logger.warn(e.getMessage());
                 }
             }

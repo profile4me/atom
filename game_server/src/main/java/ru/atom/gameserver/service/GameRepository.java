@@ -23,6 +23,10 @@ public class GameRepository {
         return gameId;
     }
 
+    public void deleteGame(Long id) {
+        games.remove(id);
+    }
+
     public GameSession getGameById(Long id) {
         return games.get(id);
     }
