@@ -36,8 +36,7 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
         sessionMap.put(session, idLoginPair.getKey());
-        GameSession gameSession = gameRepository.getGameById(idLoginPair.getKey());
-        sendMessage(idLoginPair.getKey(), gameSession.addPlayer(idLoginPair.getValue()));
+        gameRepository.getGameById(idLoginPair.getKey()).addPlayer(idLoginPair.getValue());
         logger.info("new ws connection gameid=" + idLoginPair.getKey() + " login=" + idLoginPair.getValue());
     }
 
@@ -61,22 +60,40 @@ public class ConnectionHandler extends TextWebSocketHandler implements WebSocket
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) throws Exception {
         Message message = JsonHelper.fromJson(textMessage.getPayload(), Message.class);
         gameRepository.getGameById(sessionMap.get(session)).messagesOffering().offerMessage(message);
-
-        logger.info("text message has been received");
+        Pair<Long, String> idLoginPair = getParameters(session.getUri().toString());
+        logger.info("text message has been received from " + idLoginPair.getValue());
     }
 
     public void sendMessage(long gameId, Message message) {
         sessionMap.forEach((ws, id) -> {
             if (id.equals(gameId)) {
-                try {
-                    ws.sendMessage(new TextMessage(JsonHelper.toJson(message)));
-                } catch (IOException e) {
-                    logger.warn(e.getMessage());
-                } catch (Exception e) {
-                    logger.warn(e.getMessage());
-                }
+                sendMessage(ws, message);
             }
         });
+    }
+
+    public void sendMessage(long gameId, String login, Message message) {
+        for (Map.Entry<WebSocketSession, Long> entry : sessionMap.entrySet()) {
+            Pair<Long, String> idLoginPair = getParameters(entry.getKey().getUri().toString());
+            if (entry.getValue().equals(gameId) && idLoginPair.getValue().equals(login)) {
+                sendMessage(entry.getKey(), message);
+                return;
+            }
+        }
+    }
+
+    private void sendMessage(WebSocketSession session, Message message) {
+        if (session.isOpen()) {
+            try {
+                session.sendMessage(new TextMessage(JsonHelper.toJson(message)));
+            } catch (IOException e) {
+                logger.warn("warn1: " + e.getMessage());
+            } catch (Exception e) {
+                logger.warn("warn2: " + e.getMessage());
+            }
+        } else {
+            logger.info("wb has been closed!");
+        }
     }
 
     private Pair<Long, String> getParameters(String uri) {

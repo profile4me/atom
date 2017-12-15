@@ -20,11 +20,15 @@ public class Replicator {
         this.connectionHandler = connectionHandler;
     }
 
-    public Message writeReplica(List<GameObject> objects, boolean gameOverFlag) {
+    public void writePossess(int possess, String login) {
+        connectionHandler.sendMessage(gameId, login,
+                new Message(Topic.POSSESS, JsonHelper.nodeFactory.numberNode(possess)));
+    }
+
+    public void writeReplica(List<GameObject> objects, boolean gameOverFlag) {
         ObjectNode node = getJsonNode(objects, gameOverFlag);
         Message message = new Message(Topic.REPLICA, node);
         connectionHandler.sendMessage(gameId, message);
-        return message;
     }
 
     private ObjectNode getJsonNode(List<GameObject> objects, boolean gameOverFlag) {

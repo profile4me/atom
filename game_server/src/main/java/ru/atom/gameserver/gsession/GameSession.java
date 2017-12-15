@@ -42,10 +42,10 @@ public class GameSession {
         ticker.stopGameLoop();
     }
 
-    public Message addPlayer(String login) {
+    public void addPlayer(String login) {
         int possess = gameMechanics.addPlayer();
         loginOnIdMap.put(login, possess);
-        return new Message(Topic.POSSESS, JsonHelper.nodeFactory.numberNode(possess));
+        replicator.writePossess(possess, login);
     }
 
     /**
