@@ -17,9 +17,9 @@ public class GameRepository {
     @Autowired
     private ConnectionHandler connectionHandler;
 
-    public Long createGame(int playersNum) {
+    public Long createGame(int playersCnt) {
         Long gameId = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
-        games.put(gameId, new GameSession(gameId, connectionHandler));
+        games.put(gameId, new GameSession(gameId, playersCnt, connectionHandler));
         return gameId;
     }
 

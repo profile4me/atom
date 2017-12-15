@@ -1,11 +1,7 @@
 package ru.atom.gameserver.gsession;
 
-import com.fasterxml.jackson.databind.node.NumericNode;
 import ru.atom.gameserver.component.ConnectionHandler;
-import ru.atom.gameserver.message.Message;
-import ru.atom.gameserver.message.Topic;
 import ru.atom.gameserver.tick.Ticker;
-import ru.atom.gameserver.util.JsonHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +15,16 @@ public class GameSession {
 
     private final Map<String, Integer> loginOnIdMap;
 
-    public GameSession(Long gameId, ConnectionHandler connectionHandler) {
+    private int playersCnt;
+
+    public GameSession(Long gameId, int playersCnt, ConnectionHandler connectionHandler) {
         this.ticker = new Ticker();
         this.replicator = new Replicator(gameId, connectionHandler);
         this.gameMechanics = new GameMechanics(ticker, replicator);
         this.inputQueue = new InputQueue();
         this.loginOnIdMap = new HashMap<>();
+
+        this.playersCnt = playersCnt;
 
         //gameMechanics must be last tickable in the list of tickable
         ticker.registerTickable(gameMechanics);
@@ -46,6 +46,9 @@ public class GameSession {
         int possess = gameMechanics.addPlayer();
         loginOnIdMap.put(login, possess);
         replicator.writePossess(possess, login);
+        if (loginOnIdMap.size() == playersCnt) {
+            start();
+        }
     }
 
     /**
