@@ -14,9 +14,14 @@ public class Ticker {
     private static final long FRAME_TIME = 1000 / FPS;
     private List<Tickable> tickables = new CopyOnWriteArrayList<>();
     private long tickNumber = 0;
+    private volatile boolean gameStoped = false;
+
+    public void stopGameLoop() {
+        gameStoped = true; //this is atomic operation
+    }
 
     public void gameLoop() {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!gameStoped && !Thread.currentThread().isInterrupted()) {
             long started = System.currentTimeMillis();
             act(FRAME_TIME);
             long elapsed = System.currentTimeMillis() - started;
@@ -29,6 +34,7 @@ public class Ticker {
             //log.info("{}: tick ", tickNumber);
             tickNumber++;
         }
+        log.info("stoped ticker");
     }
 
     public void registerTickable(Tickable tickable) {
