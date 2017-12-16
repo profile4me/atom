@@ -1,4 +1,4 @@
-package ru.atom.gameserver.json.geometry;
+package ru.atom.gameserver.geometry;
 
 import org.junit.Test;
 import ru.atom.gameserver.geometry.Bar;
@@ -10,30 +10,39 @@ import static org.junit.Assert.assertTrue;
 
 public class GeometryTest {
 
-    @Test
-    public void barTest() {
-        Bar bar = new Bar(0, 0, 10, 10);
-        Point expectedOriginCorner = new Point(0,0);
-        Point expectedEndCorner = new Point(10, 10);
+    Bar bar = new Bar(0, 0, 10, 10);
+    Point expectedOriginCorner = new Point(0,0);
+    Point expectedEndCorner = new Point(10, 10);
+    Bar otherBar;
 
-        //проверка getOriginCorner
+    @Test
+    public void getOriginCornerTest() {
         assertTrue(Math.abs(expectedOriginCorner.getX() - bar.getOriginCorner().getX()) < 0.001f
                 && Math.abs(expectedOriginCorner.getY() - bar.getOriginCorner().getY()) < 0.001f);
+    }
 
-        //проверка getEndCorner
+    @Test
+    public void getEndCornerTest() {
         assertTrue(Math.abs(expectedEndCorner.getX() - bar.getEndCorner().getX()) < 0.001f
                 && Math.abs(expectedEndCorner.getY() - bar.getEndCorner().getY()) < 0.001f);
+    }
 
-        //проверка getWidth, getHeight
+    @Test
+    public void getWidthHeightTest() {
         assertTrue(Math.abs(bar.getHeight() - 10.0f) < 0.001);
         assertTrue(Math.abs(bar.getWidth() - 10.0f) < 0.001);
+    }
 
-        //проверка isIntersecting
-        Bar otherBar = new Bar(15, 15, 25, 25);
+    @Test
+    public void isIntersectingTest() {
+        otherBar = new Bar(15, 15, 25, 25);
         assertTrue(!bar.isIntersecting(otherBar));
         otherBar = new Bar(5, 5, 15, 15);
         assertTrue(bar.isIntersecting(otherBar));
+    }
 
+    @Test
+    public void isIncludingTest() {
         //проверка isIncluding(Point)
         Point point = new Point(15, 15);
         assertTrue(!bar.isIncluding(point));
@@ -43,16 +52,20 @@ public class GeometryTest {
         //проверка isIncluding(Bar)
         otherBar = new Bar(5, 5, 15, 15);
         assertTrue(!bar.isIncluding(otherBar));
-        otherBar = new Bar(2,2,8,8);
+        otherBar = new Bar(2, 2, 8, 8);
         assertTrue(bar.isIncluding(otherBar));
+    }
 
-        //проверка isColliding
-        otherBar = new Bar(9,9,15,15);
+    @Test
+    public void isCollidingTest() {
+        otherBar = new Bar(9, 9, 15, 15);
         assertTrue(bar.isColliding(otherBar));
-        point = new Point(9,9);
+        Point point = new Point(9, 9);
         assertTrue(bar.isColliding(point));
+    }
 
-        //проверка equals
+    @Test
+    public void equalsTest() {
         otherBar = new Bar(new Point(0,0), 10, 10);
         assertTrue(bar.equals(otherBar));
     }
