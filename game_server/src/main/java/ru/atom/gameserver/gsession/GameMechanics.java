@@ -104,41 +104,21 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
             switch (message.getTopic()) {
                 case MOVE: {
                     int possess = jsonNode.get("possess").asInt();
-                    if (translated.contains(possess)) {
+                    if (!pawns.containsKey(possess) || translated.contains(possess)) {
                         continue;
                     }
                     translated.add(possess);
                     Movable.Direction direction = Movable.Direction.valueOf(jsonNode.get("direction").asText());
-                    Pawn pawn = pawns.get(possess);
-                    if (pawn == null) {
-                        break;
-                    }
-                    Point prevPos = pawn.getPosition();
-                    Point nextPos = pawn.move(direction, elapsed);
-                    pawn.setPosition(nextPos);
-                    Bar nextBar = pawn.getBar();
-                    boolean collision = false;
-                    for(GameObject gameObject : gameObjects) {
-                        if (gameObject instanceof Wall || gameObject instanceof Wood) {
-                            if (nextBar.isColliding(gameObject.getBar())) {
-                                collision = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (collision) {
-                        pawn.setPosition(prevPos);
-                    }
+                    pawns.get(possess).move(direction, elapsed);
                 }
                     break;
                 case PLANT_BOMB: {
                     int possess = jsonNode.asInt();
-                    if (translated.contains(possess)) {
+                    if (!pawns.containsKey(possess) || translated.contains(possess)) {
                         continue;
                     }
                     translated.add(possess);
-                    Pawn pawn = pawns.get(possess);
-                    putBomb(pawn.getPosition(), 3000, pawn.getBombPower());
+                    pawns.get(possess).plainBombEvent();
                 }
                     break;
             }
@@ -228,5 +208,18 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
             }
         }
         return intersectPawns;
+    }
+
+    @Override
+    public List<GameObject> getIntersectStatic(Bar bar) {
+        List<GameObject> staticObjects = new ArrayList<>();
+        gameObjects.forEach(gameObject -> {
+            if (gameObject instanceof Static) {
+                if (gameObject.getBar().isColliding(bar)) {
+                    staticObjects.add(gameObject);
+                }
+            }
+        });
+        return staticObjects;
     }
 }

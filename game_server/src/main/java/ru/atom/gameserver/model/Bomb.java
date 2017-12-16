@@ -9,7 +9,7 @@ import ru.atom.gameserver.tick.Tickable;
 /**
  * Created by Alexandr on 06.12.2017.
  */
-public class Bomb extends SaneGameObject implements Tickable {
+public class Bomb extends SaneGameObject implements Tickable, Static {
 
     private long lifetime;
     private final int power;

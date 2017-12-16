@@ -29,9 +29,13 @@ public class Pawn extends SaneGameObject implements Movable{
         bombs = new ArrayList<>();
     }
 
+    private Bar getSpecificBar(Point position) {
+        return new Bar(position, 28, 28);
+    }
+
     @Override
     public void calculateBar() {
-        setBar(new Bar(getPosition(), 28, 28));
+        setBar(getSpecificBar(getPosition()));
     }
 
     public float getVelocity() {
@@ -67,6 +71,27 @@ public class Pawn extends SaneGameObject implements Movable{
             case LEFT: newPosition = new Point(lastPosition.getX() - time * vel, lastPosition.getY()); break;
             default: newPosition = new Point(lastPosition.getX(), lastPosition.getY());
         }
-        return newPosition;
+        Bar currBar = getBar();
+        Bar nextBar = getSpecificBar(newPosition);
+        List<GameObject> statics = modelsManager.getIntersectStatic(nextBar);
+        boolean collision = false;
+        for (GameObject gameObject : statics) {
+            if (nextBar.isColliding(gameObject.getBar())) {
+                if (!currBar.isColliding(gameObject.getBar())) {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+        if (!collision) {
+            setPosition(newPosition);
+        }
+
+        return getPosition();
     }
+
+    public void plainBombEvent() {
+        modelsManager.putBomb(getPosition(), 2000, bombPower);
+    }
+
 }
