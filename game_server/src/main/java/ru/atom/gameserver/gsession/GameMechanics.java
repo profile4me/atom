@@ -78,7 +78,7 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
         int id = nextId();
         Point point = null;
         switch (pawns.size()){
-            case 0: point = new Point(DEF_SIZE, DEF_SIZE); break;
+            case 0: point = new Point(DEF_SIZE + 1.0f, DEF_SIZE + 1.0f); break;
             case 1: point = new Point(DEF_SIZE * 15, DEF_SIZE); break;
             case 2: point = new Point(DEF_SIZE, DEF_SIZE * 11); break;
             case 3: point = new Point(DEF_SIZE * 15, DEF_SIZE * 11); break;
@@ -108,19 +108,21 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
                     translated.add(possess);
                     Movable.Direction direction = Movable.Direction.valueOf(jsonNode.get("direction").asText());
                     Pawn pawn = pawns.get(possess);
+                    Point prevPos = pawn.getPosition();
                     Point nextPos = pawn.move(direction, elapsed);
-                    Bar nextBar = Pawn.getBarForPosition(nextPos);
+                    pawn.setPosition(nextPos);
+                    Bar nextBar = pawn.getBar();
                     boolean collision = false;
                     for(GameObject gameObject : gameObjects) {
-                        if (gameObject instanceof Wall || gameObject instanceof Wood) {
+                        if (gameObject instanceof Wall || gameObject instanceof Wood || gameObject instanceof Bomb) {
                             if (nextBar.isColliding(gameObject.getBar())) {
                                 collision = true;
                                 break;
                             }
                         }
                     }
-                    if (!collision) {
-                        pawn.setPosition(nextPos);
+                    if (collision) {
+                        pawn.setPosition(prevPos);
                     }
                 }
                     break;
@@ -175,7 +177,8 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
 
     @Override
     public void putBomb(Point point, long lifetime, int power) {
-        Bomb bomb = new Bomb(nextId(), normilizePoint(point), lifetime, power);
+        Point normPoint = normilizePoint(point);
+        Bomb bomb = new Bomb(nextId(), normPoint, lifetime, power);
         bomb.setGarbageCollector(this);
         bomb.setModelsManager(this);
         gameObjects.add(bomb);

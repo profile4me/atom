@@ -23,7 +23,7 @@ public abstract class AbstractGameObject implements GameObject {
     public AbstractGameObject(int id, Point position) {
         this.id = id;
         this.position = new Point(position);
-        bar = new Bar(position, DEF_SIZE, DEF_SIZE);
+        calculateBar();
     }
 
     @Override
@@ -38,6 +38,7 @@ public abstract class AbstractGameObject implements GameObject {
 
     public void setPosition(Point position) {
         this.position = position;
+        calculateBar();
     }
 
     @Override
@@ -48,5 +49,10 @@ public abstract class AbstractGameObject implements GameObject {
     @Override
     public void setBar(Bar bar) {
         this.bar = bar;
+    }
+
+    @Override
+    public void calculateBar() {
+        bar = new Bar(position, DEF_SIZE, DEF_SIZE);
     }
 }

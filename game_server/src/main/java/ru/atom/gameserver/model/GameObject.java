@@ -15,4 +15,6 @@ public interface GameObject {
     Bar getBar();
 
     void setBar(Bar newBar);
+
+    void calculateBar();
 }

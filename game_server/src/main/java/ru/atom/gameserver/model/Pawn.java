@@ -19,9 +19,6 @@ public class Pawn extends AbstractGameObject implements Movable {
     @JsonIgnore
     private List<Bomb> bombs;
 
-    public static Bar getBarForPosition(Point position) {
-        return new Bar(new Point(position.getX() + 1.0f, position.getY() + 1.0f), 30, 30);
-    }
 
     public Pawn(int id, Point position, float velocity, int maxBombs) {
         super(id, position);
@@ -30,13 +27,11 @@ public class Pawn extends AbstractGameObject implements Movable {
         this.bombPower = 1;
         this.speedModifier = 1.0f;
         bombs = new ArrayList<>();
-        setBar(getBarForPosition(position));
     }
 
     @Override
-    public void setPosition(Point position) {
-        super.setPosition(position);
-        setBar(getBarForPosition(position));
+    public void calculateBar() {
+        setBar(new Bar(getPosition(), 28, 28));
     }
 
     public float getVelocity() {

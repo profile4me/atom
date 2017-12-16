@@ -2,6 +2,7 @@ package ru.atom.gameserver.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import ru.atom.gameserver.geometry.Bar;
 import ru.atom.gameserver.geometry.Point;
 import ru.atom.gameserver.tick.Tickable;
 
@@ -25,6 +26,11 @@ public class Bomb extends SaneGameObject implements Tickable {
 
     public int getPower() {
         return power;
+    }
+
+    @Override
+    public void calculateBar() {
+        setBar(new Bar(getPosition(), 28, 28));
     }
 
     @Override
