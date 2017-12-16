@@ -68,7 +68,13 @@ public class Pawn extends SaneGameObject implements Movable{
 
     @Override
     public void tick(long elapsed) {
-
+        for (int index = 0; index < bombs.size();) {
+            if (bombs.get(index).getLifetime() <= 0) {
+                bombs.remove(index);
+            } else {
+                ++index;
+            }
+        }
     }
 
     @Override
@@ -103,7 +109,10 @@ public class Pawn extends SaneGameObject implements Movable{
     }
 
     public void plainBombEvent() {
-        modelsManager.putBomb(getPosition(), 2000, bombPower);
+        if (maxBombs > bombs.size()) {
+            Bomb bomb = modelsManager.putBomb(getPosition(), 2000, bombPower);
+            bombs.add(bomb);
+        }
     }
 
 }

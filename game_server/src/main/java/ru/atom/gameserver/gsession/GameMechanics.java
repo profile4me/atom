@@ -172,24 +172,27 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
     }
 
     @Override
-    public void putBomb(Point point, long lifetime, int power) {
+    public Bomb putBomb(Point point, long lifetime, int power) {
         Point normPoint = normilizePoint(point);
         Bomb bomb = new Bomb(nextId(), normPoint, lifetime, power);
         bomb.setGarbageCollector(this);
         bomb.setModelsManager(this);
         gameObjects.add(bomb);
         ticker.insertTickableFront(bomb);
+        return bomb;
     }
 
     @Override
-    public void putFire(Point point, long lifetime, int power) {
+    public List<Fire> putFire(Point point, long lifetime, int power) {
         List<Field.Cell> cells = field.getFireCells(pointToCell(point), power);
+        List<Fire> fires = new ArrayList<>();
         for (Field.Cell fireCell : cells) {
             Fire fire = new Fire(nextId(), cellToPoint(fireCell), lifetime);
             fire.setGarbageCollector(this);
             fire.setModelsManager(this);
             gameObjects.add(fire);
             ticker.insertTickableFront(fire);
+            fires.add(fire);
         }
         cells = field.applyFireCells(cells);
         for (Field.Cell cell : cells) {
@@ -200,16 +203,18 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
             }
             garbageIndexSet.add(wood);
         }
+        return fires;
     }
 
     @Override
-    public void putBonus(Point point, Buff.BuffType buffType) {
+    public Buff putBonus(Point point, Buff.BuffType buffType) {
         Buff buff = new Buff(nextId(), point, buffType);
         buff.setGarbageCollector(this);
         buff.setModelsManager(this);
         field.setBonus(pointToCell(point));
         gameObjects.add(buff);
         ticker.insertTickableFront(buff);
+        return buff;
     }
 
     @Override
