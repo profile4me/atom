@@ -45,14 +45,14 @@ public class JsonTest {
         assertEquals(expectedString, actualString);
     }
 
-    @Test
+    /*@Test
     public void woodWithBuffJsonTest() {
         Wood wood = new Wood(1, new Point(1.0f, 1.0f));
         wood.setBuff(Buff.BuffType.CAPACITY);
         String actualString = JsonHelper.getJsonNode(wood).toString();
         String expectedString = "{\"id\":1,\"position\":{\"x\":1.0,\"y\":1.0},\"buffType\":\"CAPACITY\"}";
         assertEquals(expectedString, actualString);
-    }
+    }*/
 
     @Test
     public void buffJsonTest() {
