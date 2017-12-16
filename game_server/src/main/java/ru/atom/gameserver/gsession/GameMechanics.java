@@ -86,6 +86,7 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
         }
         Pawn pawn = new Pawn(id, point, 0.16667f, 1);
         pawn.setGarbageCollector(this);
+        pawn.setModelsManager(this);
         gameObjects.add(pawn);
         pawns.put(id, pawn);
         ticker.insertTickableFront(pawn);
