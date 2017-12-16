@@ -46,12 +46,24 @@ public class Pawn extends SaneGameObject implements Movable{
         return maxBombs;
     }
 
+    public void setMaxBombs(int maxBombs) {
+        this.maxBombs = maxBombs;
+    }
+
     public int getBombPower() {
         return bombPower;
     }
 
+    public void setBombPower(int bombPower) {
+        this.bombPower = bombPower;
+    }
+
     public float getSpeedModifier() {
         return speedModifier;
+    }
+
+    public void setSpeedModifier(float speedModifier) {
+        this.speedModifier = speedModifier;
     }
 
     @Override
@@ -61,14 +73,14 @@ public class Pawn extends SaneGameObject implements Movable{
 
     @Override
     public Point move(Direction direction, long time) {
+        float dist = velocity * speedModifier * (time / 1000.0f);
         Point lastPosition = getPosition();
         Point newPosition;
-        float vel = getVelocity();
         switch (direction) {
-            case UP: newPosition = new Point(lastPosition.getX(), lastPosition.getY() + time * vel); break;
-            case RIGHT: newPosition = new Point(lastPosition.getX() + time * vel, lastPosition.getY()); break;
-            case DOWN: newPosition = new Point(lastPosition.getX(), lastPosition.getY() - time * vel); break;
-            case LEFT: newPosition = new Point(lastPosition.getX() - time * vel, lastPosition.getY()); break;
+            case UP: newPosition = new Point(lastPosition.getX(), lastPosition.getY() + dist); break;
+            case RIGHT: newPosition = new Point(lastPosition.getX() + dist, lastPosition.getY()); break;
+            case DOWN: newPosition = new Point(lastPosition.getX(), lastPosition.getY() - dist); break;
+            case LEFT: newPosition = new Point(lastPosition.getX() - dist, lastPosition.getY()); break;
             default: newPosition = new Point(lastPosition.getX(), lastPosition.getY());
         }
         Bar currBar = getBar();

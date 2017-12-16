@@ -1,6 +1,5 @@
 package ru.atom.gameserver.gsession;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import ru.atom.gameserver.geometry.Bar;
 import ru.atom.gameserver.geometry.Point;
@@ -10,7 +9,14 @@ import ru.atom.gameserver.tick.Tickable;
 import ru.atom.gameserver.tick.Ticker;
 import ru.atom.gameserver.util.JsonHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameMechanics implements Tickable, GarbageCollector, ModelsManager {
@@ -33,9 +39,6 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
         this.replicator = replicator;
         this.inputQueue = inputQueue;
         this.field = new Field();
-        //init walls and boxes here
-        //bombs, explosion and paws must be added to ticker
-        //левая ограничивающая стена
         initByMap();
     }
 
@@ -44,6 +47,7 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
     }
 
     private void initByMap() {
+        List<Wood> woodCollection = new ArrayList<>();
         for (int row = 0; row < Field.ROWS; ++row) {
             for (int col = 0; col < Field.COLS; ++col) {
                 Field.Cell cell = new Field.Cell(col, row);
@@ -65,12 +69,19 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
                         field.setId(cell, id);
                         Wood wood = new Wood(id, indexToPoint(col, row));
                         gameObjects.add(wood);
+                        woodCollection.add(wood);
                     }
                         break;
                     default:
                         break;
                 }
             }
+        }
+        Collections.shuffle(woodCollection);
+        Random rnd = new Random();
+        Buff.BuffType[] buffTypes = Buff.BuffType.values();
+        for (int i = 0; i < woodCollection.size(); ++i) {
+            woodCollection.get(i).setBuffType(buffTypes[rnd.nextInt(buffTypes.length)]);
         }
     }
 
@@ -79,12 +90,12 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
         Point point = null;
         switch (pawns.size()){
             case 0: point = new Point(DEF_SIZE + 1.0f, DEF_SIZE + 1.0f); break;
-            case 1: point = new Point(DEF_SIZE * 15, DEF_SIZE); break;
-            case 2: point = new Point(DEF_SIZE, DEF_SIZE * 11); break;
-            case 3: point = new Point(DEF_SIZE * 15, DEF_SIZE * 11); break;
+            case 1: point = new Point(DEF_SIZE * 15 - 1.0f, DEF_SIZE + 1.0f); break;
+            case 2: point = new Point(DEF_SIZE + 1.0f, DEF_SIZE * 11 - 1.0f); break;
+            case 3: point = new Point(DEF_SIZE * 15 - 1.0f, DEF_SIZE * 11 - 1.0f); break;
             default: point = null;
         }
-        Pawn pawn = new Pawn(id, point, 0.16667f, 1);
+        Pawn pawn = new Pawn(id, point, 100.0f, 1);
         pawn.setGarbageCollector(this);
         pawn.setModelsManager(this);
         gameObjects.add(pawn);
@@ -194,6 +205,8 @@ public class GameMechanics implements Tickable, GarbageCollector, ModelsManager 
     @Override
     public void putBonus(Point point, Buff.BuffType buffType) {
         Buff buff = new Buff(nextId(), point, buffType);
+        buff.setGarbageCollector(this);
+        buff.setModelsManager(this);
         field.setBonus(pointToCell(point));
         gameObjects.add(buff);
         ticker.insertTickableFront(buff);

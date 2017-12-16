@@ -20,4 +20,7 @@ public class Wood extends AbstractGameObject implements Static {
         return buffType;
     }
 
+    public void setBuffType(Buff.BuffType buffType) {
+        this.buffType = buffType;
+    }
 }
