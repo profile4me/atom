@@ -1,8 +1,9 @@
 package ru.atom.gameserver.model;
 
 import ru.atom.gameserver.geometry.Point;
+import ru.atom.gameserver.tick.Tickable;
 
-public class Buff extends AbstractGameObject {
+public class Buff extends SaneGameObject implements Tickable {
 
     private final BuffType buffType;
 
@@ -13,6 +14,11 @@ public class Buff extends AbstractGameObject {
 
     public BuffType getType() {
         return buffType;
+    }
+
+    @Override
+    public void tick(long elapsed) {
+
     }
 
     public enum BuffType {

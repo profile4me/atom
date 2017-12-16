@@ -64,7 +64,7 @@ public class JsonTest {
 
     @Test
     public void explosionJsonTest() {
-        Explosion explosion = new Explosion(1, new Point(1.0f, 1.0f), 2000);
+        Fire explosion = new Fire(1, new Point(1.0f, 1.0f), 2000);
         String actualString = JsonHelper.getJsonNode(explosion).toString();
         String expectedString = "{\"id\":1,\"position\":{\"x\":1.0,\"y\":1.0},\"lifetime\":2000}";
         assertEquals(expectedString, actualString);

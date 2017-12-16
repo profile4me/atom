@@ -8,7 +8,7 @@ import ru.atom.gameserver.tick.Tickable;
 /**
  * Created by Alexandr on 06.12.2017.
  */
-public class Bomb extends AbstractGameObject implements Tickable {
+public class Bomb extends SaneGameObject implements Tickable {
 
     private long lifetime;
     private final int power;
@@ -29,7 +29,11 @@ public class Bomb extends AbstractGameObject implements Tickable {
 
     @Override
     public void tick(long elapsed) {
-
+        lifetime -= elapsed;
+        if (lifetime <= 0) {
+            modelsManager.putFire(getPosition(), 1000, power);
+            destroy();
+        }
     }
 
 }
